@@ -17,12 +17,19 @@ let mailer = null;
 if(GMAIL_USER && GMAIL_APP_PASSWORD){
   mailer = nodemailer.createTransport({
     service: 'gmail',
-    auth: { user: GMAIL_USER, pass: GMAIL_APP_PASSWORD }
+    auth: { user: GMAIL_USER, pass: GMAIL_APP_PASSWORD.replace(/\s/g, '') }
   });
+  console.log('Email sender configured for', GMAIL_USER);
+} else {
+  console.log('Email sender NOT configured — GMAIL_USER or GMAIL_APP_PASSWORD is missing in environment variables.');
 }
 
 async function notifyNewApplication(app_){
-  if(!mailer) return;
+  if(!mailer){
+    console.log('Skipping email notification — mailer is not configured.');
+    return;
+  }
+  console.log('Sending new-application email for', app_.name);
   const waLink = `https://wa.me/254${app_.phone.replace(/^0/, '')}`;
   try{
     await mailer.sendMail({
